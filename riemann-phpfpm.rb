@@ -20,7 +20,7 @@ class RiemannPhpfpmCollector
     tags = @opts[ 'tags' ].split( "," )
 
     report( {
-      :service => "php-fpm #{key}",
+      :service => "phpfpm #{key}",
       :metric => value.to_i,
       :state => state( key, value ),
       :tags => tags
@@ -33,33 +33,37 @@ class RiemannPhpfpmCollector
 
   def tick
     response = nil
-    url = "http://" + @opts[ 'watchhost' ] + "/" + @opts[ 'watchroute' ] + "?json"
     tags = @opts[ 'tags' ].split( "," )
 
-    begin
-      response = Typhoeus.get( url )
-    rescue => e
+    for pool in @opts[ 'pools' ]
+      url = "http://" + pool[ 'watchhost' ] + "/" + pool[ 'watchroute' ] + "?json"
+
+      begin
+        response = Typhoeus.get( url )
+      rescue => e
+        report( {
+          :service => "phpfpm #{pool[ 'name' ]} health",
+          :state => 'critical',
+          :description => "Connection error: #{e.class} - #{e.message}",
+          :tags => tags
+        } )
+      end
+
+      return if response.nil?
+
       report( {
-        :service => 'php-fpm health',
-        :state => 'critical',
-        :description => "Connection error: #{e.class} - #{e.message}",
+        :service => "phpfpm #{pool[ 'name' ]} health",
+        :state => 'ok',
+        :description => 'php-fpm status connection ok',
         :tags => tags
       } )
-    end
 
-    return if response.nil?
+      metrics = JSON.parse( response.body )
 
-    report( {
-      :service => 'php-fpm health',
-      :state => 'ok',
-      :description => 'php-fpm status connection ok',
-      :tags => tags
-    } )
+      metrics.each do |key, value|
+        report_metric( key, value ) unless [ "pool", "process manager", "start time" ].include?( key )
+      end
 
-    metrics = JSON.parse( response.body )
-
-    metrics.each do |key, value|
-      report_metric( key, value ) unless [ "pool", "process manager", "start time" ].include?( key )
     end
   end
 
