@@ -16,11 +16,12 @@ class RiemannPhpfpmCollector
     return 'ok'
   end
 
-  def report_metric( key, value )
+  def report_metric( poolname, key, value )
     tags = @opts[ 'tags' ].split( "," )
+    service = "php-fpm " + poolname + " " + key
 
     report( {
-      :service => "php-fpm #{key}",
+      :service => service,
       :metric => value.to_i,
       :state => state( key, value ),
       :tags => tags
@@ -28,6 +29,7 @@ class RiemannPhpfpmCollector
   end
 
   def report(event)
+    puts event
     @client.tcp << event
   end
 
@@ -37,12 +39,13 @@ class RiemannPhpfpmCollector
 
     for pool in @opts[ 'pools' ]
       url = "http://" + pool[ 'watchhost' ] + "/" + pool[ 'watchroute' ] + "?json"
+      service = "php-fpm " + pool[ 'name' ] + " health"
 
       begin
         response = Typhoeus.get( url )
       rescue => e
         report( {
-          :service => "php-fpm #{pool[ 'name' ]} health",
+          :service => service,
           :state => 'critical',
           :description => "Connection error: #{e.class} - #{e.message}",
           :tags => tags
@@ -52,7 +55,7 @@ class RiemannPhpfpmCollector
       return if response.nil?
 
       report( {
-        :service => "php-fpm #{pool[ 'name' ]} health",
+        :service => service,
         :state => 'ok',
         :description => 'php-fpm status connection ok',
         :tags => tags
@@ -61,7 +64,7 @@ class RiemannPhpfpmCollector
       metrics = JSON.parse( response.body )
 
       metrics.each do |key, value|
-        report_metric( key, value ) unless [ "pool", "process manager", "start time" ].include?( key )
+        report_metric( pool[ 'name' ], key, value ) unless [ "pool", "process manager", "start time" ].include?( key )
       end
 
     end
