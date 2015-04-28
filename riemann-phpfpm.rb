@@ -40,7 +40,8 @@ class RiemannPhpfpmCollector
       report( {
         :service => 'php-fpm health',
         :state => 'critical',
-        :description => "Connection error: #{e.class} - #{e.message}"
+        :description => "Connection error: #{e.class} - #{e.message}",
+        :tags => tags
       } )
     end
 
@@ -49,7 +50,8 @@ class RiemannPhpfpmCollector
     report( {
       :service => 'php-fpm health',
       :state => 'ok',
-      :description => 'php-fpm status connection ok'
+      :description => 'php-fpm status connection ok',
+      :tags => tags
     } )
 
     metrics = JSON.parse( response.body )
