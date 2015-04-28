@@ -28,7 +28,7 @@ class RiemannPhpfpmCollector
   end
 
   def report(event)
-    @client << event
+    @client.tcp << event
   end
 
   def tick
