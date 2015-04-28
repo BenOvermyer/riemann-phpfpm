@@ -20,7 +20,7 @@ class RiemannPhpfpmCollector
     tags = @opts[ 'tags' ].split( "," )
 
     report( {
-      :service => "phpfpm #{key}",
+      :service => "php-fpm #{key}",
       :metric => value.to_i,
       :state => state( key, value ),
       :tags => tags
@@ -42,7 +42,7 @@ class RiemannPhpfpmCollector
         response = Typhoeus.get( url )
       rescue => e
         report( {
-          :service => "phpfpm #{pool[ 'name' ]} health",
+          :service => "php-fpm #{pool[ 'name' ]} health",
           :state => 'critical',
           :description => "Connection error: #{e.class} - #{e.message}",
           :tags => tags
@@ -52,7 +52,7 @@ class RiemannPhpfpmCollector
       return if response.nil?
 
       report( {
-        :service => "phpfpm #{pool[ 'name' ]} health",
+        :service => "php-fpm #{pool[ 'name' ]} health",
         :state => 'ok',
         :description => 'php-fpm status connection ok',
         :tags => tags
