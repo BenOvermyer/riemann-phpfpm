@@ -30,7 +30,7 @@ class RiemannPhpfpmCollector
   def tick
     response = nil
     begin
-      curlresult = Typhoeus.get( "http://" + opts[:watchhost] + "/" opts[:watchroute] + "?json" )
+      curlresult = Typhoeus.get( "http://" + opts[:watchhost] + "/" + opts[:watchroute] + "?json" )
       response = curlresult.body_str
     rescue => e
       report( {
