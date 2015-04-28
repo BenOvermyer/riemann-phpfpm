@@ -34,6 +34,8 @@ class RiemannPhpfpmCollector
   def tick
     response = nil
     url = "http://" + @opts[ 'watchhost' ] + "/" + @opts[ 'watchroute' ] + "?json"
+    tags = @opts[ 'tags' ].split( "," )
+
     begin
       response = Typhoeus.get( url )
     rescue => e
