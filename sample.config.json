@@ -3,5 +3,6 @@
   "port": 5555,
   "timeout": 5,
   "watchhost": "localhost",
-  "watchroute": "status"
+  "watchroute": "status",
+  "tags": "php-fpm"
 }

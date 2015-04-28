@@ -8,8 +8,7 @@ class RiemannPhpfpmCollector
   def initialize()
     configfile = File.open( "config.json", "r" )
     @opts = JSON.parse( configfile.read )
-
-    @client = Riemann::Client.new host: @opts[ :hostname ], port: @opts[ :port ], timeout: @opts[ :timeout ]
+    @client = Riemann::Client.new host: @opts[ 'hostname' ], port: @opts[ 'port' ], timeout: @opts[ 'timeout' ]
   end
 
   def state( key, value )
@@ -18,11 +17,13 @@ class RiemannPhpfpmCollector
   end
 
   def report_metric( key, value )
+    tags = @opts[ 'tags' ].split( "," )
+
     report( {
       :service => "php-fpm #{key}",
       :metric => value.to_i,
       :state => state( key, value ),
-      :tags => [ 'php-fpm' ]
+      :tags => tags
     } )
   end
 
@@ -32,9 +33,9 @@ class RiemannPhpfpmCollector
 
   def tick
     response = nil
+    url = "http://" + @opts[ 'watchhost' ] + "/" + @opts[ 'watchroute' ] + "?json"
     begin
-      curlresult = Typhoeus.get( "http://" + @opts[:watchhost] + "/" + @opts[:watchroute] + "?json" )
-      response = curlresult.body_str
+      response = Typhoeus.get( url )
     rescue => e
       report( {
         :service => 'php-fpm health',
@@ -51,7 +52,7 @@ class RiemannPhpfpmCollector
       :description => 'php-fpm status connection ok'
     } )
 
-    metrics = JSON.parse( response )
+    metrics = JSON.parse( response.body )
 
     metrics.each do |key, value|
       report_metric( key, value ) unless [ "pool", "process manager", "start time" ].include?( key )
