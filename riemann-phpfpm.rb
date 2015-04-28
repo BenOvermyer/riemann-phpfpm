@@ -2,11 +2,13 @@
 
 require 'riemann/client'
 require 'typhoeus'
-require 'config.rb'
 
 class RiemannPhpfpmCollector
-  def initialize(opts)
-    @client = Riemann::Client.new host: opts[ :hostname ], port: opts[ :port ], timeout: opts[ :timeout ]
+  def initialize()
+    configfile = File.open( "config.json", "r" )
+    @opts = JSON.parse( configfile.read )
+
+    @client = Riemann::Client.new host: @opts[ :hostname ], port: @opts[ :port ], timeout: @opts[ :timeout ]
   end
 
   def state( key, value )
@@ -30,7 +32,7 @@ class RiemannPhpfpmCollector
   def tick
     response = nil
     begin
-      curlresult = Typhoeus.get( "http://" + opts[:watchhost] + "/" + opts[:watchroute] + "?json" )
+      curlresult = Typhoeus.get( "http://" + @opts[:watchhost] + "/" + @opts[:watchroute] + "?json" )
       response = curlresult.body_str
     rescue => e
       report( {
