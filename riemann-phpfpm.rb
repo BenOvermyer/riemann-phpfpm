@@ -2,6 +2,7 @@
 
 require 'riemann/client'
 require 'typhoeus'
+require 'json'
 
 class RiemannPhpfpmCollector
   def initialize()
