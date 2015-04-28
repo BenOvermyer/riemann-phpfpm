@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'riemann/client'
+require 'typhoeus'
 require 'config.rb'
 
 class RiemannPhpfpmCollector
@@ -29,7 +30,7 @@ class RiemannPhpfpmCollector
   def tick
     response = nil
     begin
-      curlresult = Curl.get( "http://" + opts[:watchhost] + "/" opts[:watchroute] + "?json" )
+      curlresult = Typhoeus.get( "http://" + opts[:watchhost] + "/" opts[:watchroute] + "?json" )
       response = curlresult.body_str
     rescue => e
       report( {
