@@ -29,7 +29,6 @@ class RiemannPhpfpmCollector
   end
 
   def report(event)
-    puts event
     @client.tcp << event
   end
 
