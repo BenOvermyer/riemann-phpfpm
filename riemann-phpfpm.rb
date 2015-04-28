@@ -71,4 +71,4 @@ class RiemannPhpfpmCollector
   end
 end
 
-RiemannPhpfpmCollector.new(opts).run
+RiemannPhpfpmCollector.new.run
